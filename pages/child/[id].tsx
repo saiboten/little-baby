@@ -10,6 +10,7 @@ import { getFirestore, doc, updateDoc } from "firebase/firestore";
 import { useDocument } from "react-firebase-hooks/firestore";
 import firebase from "../../firebase/clientApp";
 import { useRouter } from "next/router";
+import { ChildType } from "../../types/types";
 
 interface ChildrenType {
   nickname: string;
@@ -24,7 +25,7 @@ export default function Home() {
     doc(getFirestore(firebase), `child/${id}`)
   );
 
-  const childData = childRef?.data();
+  const childData = childRef?.data() as ChildType;
 
   function checkGender(value: boolean) {
     if (childRef !== undefined) {
@@ -55,6 +56,10 @@ export default function Home() {
         </Checkbox>
 
         <Button onClick={() => setShowInvite.toggle()}>Inviter partner</Button>
+        <Link href={`/chosennames/${id}`}>
+          <Button>Se valgte navn</Button>
+        </Link>
+
         <Link href={`/name/${id}`}>
           <Button>Finn navn</Button>
         </Link>
