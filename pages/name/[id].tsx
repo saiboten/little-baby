@@ -115,6 +115,9 @@ export default function Name({ userData }: PageProps) {
 
   return (
     <>
+      <NextLink href={`/child/${childData?.id}`}>
+        <Link>Tilbake til {childData?.nickname}</Link>
+      </NextLink>
       <Heading size="sm">Finn et navn til {childData?.nickname} i dag!</Heading>
       {currentName === undefined ? (
         <Box>Fant ingen navn</Box>

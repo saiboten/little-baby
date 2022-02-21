@@ -17,7 +17,6 @@ interface ChildrenType {
 }
 
 export default function Home() {
-  const [showInvite, setShowInvite] = useBoolean();
   const router = useRouter();
   const { id } = router.query;
 
@@ -55,17 +54,21 @@ export default function Home() {
           Gutt?
         </Checkbox>
 
-        <Button onClick={() => setShowInvite.toggle()}>Inviter partner</Button>
+        <Link href={`/invitepartner/${id}`}>
+          <Button>Inviter partner</Button>
+        </Link>
         <Link href={`/chosennames/${id}`}>
-          <Button>Se valgte navn</Button>
+          <Button>Se dine navnevalg</Button>
+        </Link>
+
+        <Link href={`/chosennamescommon/${id}`}>
+          <Button>Se felles navn</Button>
         </Link>
 
         <Link href={`/name/${id}`}>
           <Button>Finn navn</Button>
         </Link>
       </ButtonGroup>
-
-      {showInvite && <div>Inviter!</div>}
     </>
   );
 }

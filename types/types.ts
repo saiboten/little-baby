@@ -14,12 +14,17 @@ export type ChildType = {
     nickname: string;
     owner: string;
     parents: string[];
+    id: string;
 }
 
 export type NameType = {
     id: string;
     isBoy: boolean;
     name: string;
+}
+
+export type InviteType = {
+    emails: string[];
 }
 
 export interface PageProps {
