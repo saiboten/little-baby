@@ -61,12 +61,12 @@ function InvitePartner() {
       </form>
 
       {invites?.emails.map((email) => (
-        <div>
+        <div key={email}>
           {email}
           <Button
             onClick={() => deleteInvite(email)}
             leftIcon={<DeleteIcon />}
-            colorScheme="teal"
+            colorScheme="red"
             variant="solid"
           >
             Slett invitasjon

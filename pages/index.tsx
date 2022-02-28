@@ -11,7 +11,14 @@ import {
   OrderedList,
   UnorderedList,
 } from "@chakra-ui/react";
-import { getFirestore, collection, doc, setDoc } from "firebase/firestore";
+import {
+  where,
+  getFirestore,
+  collection,
+  doc,
+  setDoc,
+  query,
+} from "firebase/firestore";
 import { useCollection, useDocument } from "react-firebase-hooks/firestore";
 import Head from "next/head";
 import Image from "next/image";
@@ -22,6 +29,8 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 // Import the useAuthStateHook
 import { useAuthState } from "react-firebase-hooks/auth";
+import { useEffect } from "react";
+import { UserType } from "../types/types";
 
 const auth = getAuth(firebase);
 
@@ -36,16 +45,25 @@ export default function Home() {
     doc(getFirestore(firebase), `user/${user?.uid}`)
   );
 
-  if (!usersnapshot?.exists && usersnapshot !== undefined) {
-    setDoc(usersnapshot.ref, { children: [] });
-  }
+  const usersnapshotExists = usersnapshot?.exists();
+  const usersnapshotRef = usersnapshot?.ref;
+
+  useEffect(() => {
+    if (!usersnapshotExists && usersnapshotRef) {
+      setDoc(usersnapshotRef, { children: [] });
+    }
+  }, [usersnapshotExists, usersnapshotRef]);
+
+  const childRef = collection(getFirestore(), "child");
+
+  const userData = usersnapshot?.data() as UserType;
 
   const [childsnapshot, childLoading, childError] = useCollection(
-    collection(getFirestore(firebase), "child")
+    query(childRef, where("parents", "array-contains", userData?.id ?? ""))
   );
 
   // console.log the current user and loading status
-  if (loading) {
+  if (loading || childLoading) {
     return "Laster";
   }
 
@@ -63,7 +81,7 @@ export default function Home() {
       <UnorderedList>
         {childsnapshot?.docs.map((doc) => {
           return (
-            <ListItem>
+            <ListItem key={doc.id}>
               <NextLink key={doc.id} href={`child/${doc.id}`}>
                 <Link>{doc.data().nickname}</Link>
               </NextLink>

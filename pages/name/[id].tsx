@@ -39,23 +39,9 @@ export default function Name({ userData }: PageProps) {
     doc(db, `child/${id}`)
   );
 
-  const [
-    userSubcollectionSnapshot,
-    userSubcollectionLoading,
-    userSubcolletionError,
-  ] = useDocument(doc(db, `child/${id}/user/${userData.id}`));
-
-  const ref = userSubcollectionSnapshot?.ref;
-
-  useEffect(() => {
-    if (ref === undefined) {
-      return;
-    }
-
-    if (!userSubcollectionSnapshot?.exists()) {
-      setDoc(ref, { accepted: [], rejected: [] });
-    }
-  }, [ref]);
+  const [userSubcollectionSnapshot] = useDocument(
+    doc(db, `child/${id}/user/${userData.id}`)
+  );
 
   const childData = childsnapshot?.data() as ChildType;
   const childUserData =
