@@ -34,7 +34,7 @@ function MyApp({ Component, pageProps }: AppProps) {
   function logout() {
     signOut(auth)
       .then(() => {
-        console.log("what now");
+        // console.log("what now");
       })
       .catch((error) => {
         // An error happened.
@@ -46,7 +46,6 @@ function MyApp({ Component, pageProps }: AppProps) {
   );
 
   const authStateChanged = async (authState: any) => {
-    console.log(authState);
     if (authState === null) {
       setRedirect(true);
     }
@@ -71,12 +70,20 @@ function MyApp({ Component, pageProps }: AppProps) {
   }, [usersnapRef, usersnapshotExists, userId]);
 
   if (userLoading) {
-    return "Loading";
+    return (
+      <Container
+        mt="10"
+        border="1px solid"
+        borderColor="blue.500"
+        padding="5"
+        borderRadius="10px"
+      >
+        Laster
+      </Container>
+    );
   }
 
   const userData = usersnapshot?.data() as UserType;
-
-  console.log("rerender");
 
   return (
     <ChakraProvider>

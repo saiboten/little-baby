@@ -1,4 +1,4 @@
-import { Link } from "@chakra-ui/react";
+import { Link, UnorderedList, ListItem, Heading } from "@chakra-ui/react";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { useDocumentData } from "react-firebase-hooks/firestore";
 import NextLink from "next/link";
@@ -21,7 +21,6 @@ async function getAllAcceptedNames(
   parentId: string,
   childId: string
 ): Promise<string[]> {
-  console.log("I be called?!?!", parentId, childId);
   const db = getFirestore();
 
   const raw = await getDoc(doc(db, `/child/${childId}/user/${parentId}`));
@@ -66,9 +65,10 @@ export default function ChosenNames({ userData }: PageProps) {
 
   const length = childData?.parents.length ?? 0;
   const childId = childData?.id ?? "";
-  const parents = childData?.parents ?? [];
+  const parentsStringified = JSON.stringify(childData?.parents ?? []);
 
   const value = useCallback(async () => {
+    const parents: string[] = JSON.parse(parentsStringified);
     if (!length || !childId) {
       return;
     }
@@ -80,7 +80,7 @@ export default function ChosenNames({ userData }: PageProps) {
     const common = names.reduce((p, c) => p.filter((e) => c.includes(e)));
 
     setAcceptedNames(common);
-  }, [length, childId]);
+  }, [length, childId, parentsStringified]);
 
   useEffect(() => {
     value();
@@ -99,10 +99,14 @@ export default function ChosenNames({ userData }: PageProps) {
       <NextLink href={`/child/${childData?.id}`}>
         <Link>Tilbake til {childData?.nickname}</Link>
       </NextLink>
-      <h1>Flotte navn</h1>
-      {acceptedNames.map((el) => (
-        <Name key={el} id={el} />
-      ))}
+      <Heading>Felles navn</Heading>
+      <UnorderedList>
+        {acceptedNames.map((el) => (
+          <ListItem key={el}>
+            <Name id={el} />
+          </ListItem>
+        ))}
+      </UnorderedList>
     </div>
   );
 }

@@ -11,6 +11,7 @@ import {
 } from "@chakra-ui/react";
 import React, { useState } from "react";
 import {
+  setDoc,
   addDoc,
   updateDoc,
   doc,
@@ -43,12 +44,16 @@ export default function Child() {
   async function submitForm(e: React.SyntheticEvent) {
     e.preventDefault();
 
+    // 1 add child
     const docRef = await addDoc(collection(getFirestore(firebase), "child"), {
       isBoy: gender === "boy" ? true : false,
       nickname: name,
       owner: user?.uid,
       parents: [user?.uid],
     });
+
+    // 1.5 add id to child
+    await updateDoc(docRef, { id: docRef.id });
 
     // 2: add child on user
     const existingChildren = userData.children ?? [];
@@ -61,7 +66,21 @@ export default function Child() {
       });
     }
 
-    // 3: redirect
+    // 3: add invite
+    setDoc(doc(getFirestore(firebase), `invites/${docRef.id}`), {
+      emails: [],
+    });
+
+    // 4: add subcollection
+    setDoc(
+      doc(getFirestore(firebase), `child/${docRef.id}/user/${user?.uid}`),
+      {
+        accepted: [],
+        rejected: [],
+      }
+    );
+
+    // 4: redirect
     router.push(`/child/${docRef.id}`);
   }
 
@@ -77,7 +96,7 @@ export default function Child() {
     <form onSubmit={submitForm}>
       <Box mb="10">
         <FormControl>
-          <FormLabel htmlFor="name">Hva skal barnet hete?</FormLabel>
+          <FormLabel htmlFor="name">Kallenavn?</FormLabel>
           <Input
             id="name"
             type="text"

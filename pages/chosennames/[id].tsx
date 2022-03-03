@@ -1,5 +1,5 @@
 // index.tsx
-import { Link } from "@chakra-ui/react";
+import { Heading, Link, UnorderedList, ListItem } from "@chakra-ui/react";
 import {
   getFirestore,
   doc,
@@ -83,14 +83,18 @@ export default function ChosenNames({ userData }: PageProps) {
       <NextLink href={`/child/${childData?.id}`}>
         <Link>Tilbake til {childData?.nickname}</Link>
       </NextLink>
-      <h1>Flotte navn</h1>
-      {acceptedNames?.docs.map((el) => (
-        <div key={el.id}>{el.data().name}</div>
-      ))}
-      <h1>Fæle navn</h1>
-      {rejectedNames?.docs.map((el) => (
-        <div key={el.id}>{el.data().name}</div>
-      ))}
+      <Heading>Flotte navn</Heading>
+      <UnorderedList>
+        {acceptedNames?.docs.map((el) => (
+          <ListItem key={el.id}>{el.data().name}</ListItem>
+        ))}
+      </UnorderedList>
+      <Heading>Fæle navn</Heading>
+      <UnorderedList>
+        {rejectedNames?.docs.map((el) => (
+          <ListItem key={el.id}>{el.data().name}</ListItem>
+        ))}
+      </UnorderedList>
     </div>
   );
 }
