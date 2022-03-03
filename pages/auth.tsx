@@ -3,6 +3,7 @@ import React from "react";
 import StyledFirebaseAuth from "react-firebaseui/StyledFirebaseAuth";
 import firebase from "../firebase/clientApp";
 import { getAuth, GoogleAuthProvider } from "@firebase/auth";
+import { Heading } from "@chakra-ui/react";
 
 // Configure FirebaseUI.
 const uiConfig = {
@@ -15,14 +16,13 @@ const uiConfig = {
 
 function SignInScreen() {
   return (
-    <div>
-      <h1>Pineapple Login</h1>
-      <p>Please sign-in:</p>
+    <>
+      <Heading>Innlogging</Heading>
       <StyledFirebaseAuth
         uiConfig={uiConfig}
         firebaseAuth={getAuth(firebase)}
       />
-    </div>
+    </>
   );
 }
 

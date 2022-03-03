@@ -3,7 +3,6 @@ import { ChakraProvider, Link, Container, Box, Button } from "@chakra-ui/react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { getAuth, signOut } from "@firebase/auth";
 import type { AppProps } from "next/app";
-// index.tsx
 import { doc, setDoc } from "firebase/firestore";
 import { useDocument } from "react-firebase-hooks/firestore";
 import { getFirestore } from "firebase/firestore";
@@ -29,6 +28,7 @@ function MyApp({ Component, pageProps }: AppProps) {
     if (redirect) {
       router.push("/auth");
     }
+    setRedirect(false);
   }, [redirect, router]);
 
   function logout() {
@@ -46,7 +46,8 @@ function MyApp({ Component, pageProps }: AppProps) {
   );
 
   const authStateChanged = async (authState: any) => {
-    if (!authState) {
+    console.log(authState);
+    if (authState === null) {
       setRedirect(true);
     }
   };
@@ -74,6 +75,8 @@ function MyApp({ Component, pageProps }: AppProps) {
   }
 
   const userData = usersnapshot?.data() as UserType;
+
+  console.log("rerender");
 
   return (
     <ChakraProvider>

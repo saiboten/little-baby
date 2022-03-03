@@ -59,7 +59,7 @@ export default function Home() {
   const userData = usersnapshot?.data() as UserType;
 
   const [childsnapshot, childLoading, childError] = useCollection(
-    query(childRef, where("parents", "array-contains", userData?.id ?? ""))
+    query(childRef, where("parents", "array-contains", user?.uid))
   );
 
   // console.log the current user and loading status

@@ -1,37 +1,19 @@
 // index.tsx
-import { Container, Heading, Link } from "@chakra-ui/react";
+import { Link } from "@chakra-ui/react";
 import {
   getFirestore,
   doc,
-  updateDoc,
   collection,
   query,
   where,
 } from "firebase/firestore";
-import {
-  useDocumentData,
-  useCollectionData,
-  useDocument,
-  useCollection,
-} from "react-firebase-hooks/firestore";
+import { useDocumentData, useCollection } from "react-firebase-hooks/firestore";
 import NextLink from "next/link";
 import firebase from "../../firebase/clientApp";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import { useToast, Button, Box, ButtonGroup } from "@chakra-ui/react";
 
 // Import the useAuthStateHook
-import { useAuthState } from "react-firebase-hooks/auth";
-import { getAuth } from "@firebase/auth";
-import { PageProps, UserType } from "../../types/types";
-
-const auth = getAuth(firebase);
-
-interface NameType {
-  name: string;
-  isBoy: boolean;
-  id: string;
-}
+import { PageProps } from "../../types/types";
 
 export default function ChosenNames({ userData }: PageProps) {
   const router = useRouter();
@@ -82,7 +64,13 @@ export default function ChosenNames({ userData }: PageProps) {
       )
     );
 
-  if (namesLoading || rejectedNamesLoading || childLoading) {
+  if (
+    namesLoading ||
+    rejectedNamesLoading ||
+    childLoading ||
+    childUserSubcollectionLoading ||
+    childUserSubcollectionError
+  ) {
     return "Laster";
   }
 
@@ -97,11 +85,11 @@ export default function ChosenNames({ userData }: PageProps) {
       </NextLink>
       <h1>Flotte navn</h1>
       {acceptedNames?.docs.map((el) => (
-        <div>{el.data().name}</div>
+        <div key={el.id}>{el.data().name}</div>
       ))}
       <h1>Fæle navn</h1>
       {rejectedNames?.docs.map((el) => (
-        <div>{el.data().name}</div>
+        <div key={el.id}>{el.data().name}</div>
       ))}
     </div>
   );

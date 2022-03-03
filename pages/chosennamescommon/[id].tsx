@@ -1,31 +1,15 @@
-// index.tsx
-import { Container, Heading, Link } from "@chakra-ui/react";
-import {
-  getFirestore,
-  doc,
-  updateDoc,
-  collection,
-  query,
-  where,
-} from "firebase/firestore";
-import {
-  useDocumentData,
-  useCollectionData,
-  useDocument,
-  useCollection,
-} from "react-firebase-hooks/firestore";
+import { Link } from "@chakra-ui/react";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
+import { useDocumentData } from "react-firebase-hooks/firestore";
 import NextLink from "next/link";
 import firebase from "../../firebase/clientApp";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import { useToast, Button, Box, ButtonGroup } from "@chakra-ui/react";
-
-// Import the useAuthStateHook
-import { useAuthState } from "react-firebase-hooks/auth";
-import { getAuth } from "@firebase/auth";
-import { PageProps, UserType } from "../../types/types";
-
-const auth = getAuth(firebase);
+import { useCallback, useEffect, useState } from "react";
+import {
+  ChildUserSubCollectionType,
+  PageProps,
+  ChildType,
+} from "../../types/types";
 
 interface NameType {
   name: string;
@@ -33,61 +17,81 @@ interface NameType {
   id: string;
 }
 
+async function getAllAcceptedNames(
+  parentId: string,
+  childId: string
+): Promise<string[]> {
+  console.log("I be called?!?!", parentId, childId);
+  const db = getFirestore();
+
+  const raw = await getDoc(doc(db, `/child/${childId}/user/${parentId}`));
+  const data = raw.data();
+
+  const subcollection = data as ChildUserSubCollectionType;
+  return subcollection?.accepted;
+}
+
+interface NameProps {
+  id: string;
+}
+
+function Name({ id }: NameProps) {
+  const [data, loading, error] = useDocumentData(
+    doc(getFirestore(), `names/${id}`)
+  );
+  if (loading) {
+    return <span>Laster</span>;
+  }
+
+  if (error) {
+    return <span>Noe gikk galt</span>;
+  }
+
+  const name = data as NameType;
+
+  return <span>{name.name}</span>;
+}
+
 export default function ChosenNames({ userData }: PageProps) {
   const router = useRouter();
   const { id } = router.query;
+  const [acceptedNames, setAcceptedNames] = useState<string[]>([]);
 
-  const db = getFirestore();
-
-  const [childData, childLoading, childError] = useDocumentData(
+  const [childDataRaw, childLoading, childError] = useDocumentData(
     doc(getFirestore(firebase), `child/${id}`)
   );
 
-  const [
-    childUserSubcollectionData,
-    childUserSubcollectionLoading,
-    childUserSubcollectionError,
-  ] = useDocumentData(
-    doc(getFirestore(firebase), `child/${id}/user/${userData.id}`)
-  );
+  // childData
+  const childData = childDataRaw as ChildType;
 
-  const namesRef = collection(db, "names");
+  const length = childData?.parents.length ?? 0;
+  const childId = childData?.id ?? "";
+  const parents = childData?.parents ?? [];
 
-  const [acceptedNames, namesLoading, namesError] = useCollection(
-    query(
-      namesRef,
-      where(
-        "id",
-        "in",
-        childUserSubcollectionData?.accepted &&
-          childUserSubcollectionData?.accepted.length > 0
-          ? childUserSubcollectionData?.accepted
-          : ["nope"]
-      )
-    )
-  );
+  const value = useCallback(async () => {
+    if (!length || !childId) {
+      return;
+    }
+    const allnames = parents.map(async (parent) => {
+      return await getAllAcceptedNames(parent, childId);
+    });
 
-  const [rejectedNames, rejectedNamesLoading, rejectedNamesError] =
-    useCollection(
-      query(
-        namesRef,
-        where(
-          "id",
-          "in",
-          childUserSubcollectionData?.rejected &&
-            childUserSubcollectionData?.rejected.length > 0
-            ? childUserSubcollectionData?.rejected
-            : ["nope"]
-        )
-      )
-    );
+    const names = await Promise.all(allnames);
+    const common = names.reduce((p, c) => p.filter((e) => c.includes(e)));
 
-  if (namesLoading || rejectedNamesLoading || childLoading) {
+    setAcceptedNames(common);
+  }, [length, childId]);
+
+  useEffect(() => {
+    value();
+  }, [value]);
+
+  if (childLoading) {
     return "Laster";
   }
 
-  if (namesError || rejectedNamesError || childError) {
-    return "Feil!";
+  if (childError) {
+    return "Noe gikk galt";
   }
 
   return (
@@ -96,12 +100,8 @@ export default function ChosenNames({ userData }: PageProps) {
         <Link>Tilbake til {childData?.nickname}</Link>
       </NextLink>
       <h1>Flotte navn</h1>
-      {acceptedNames?.docs.map((el) => (
-        <div>{el.data().name}</div>
-      ))}
-      <h1>Fæle navn</h1>
-      {rejectedNames?.docs.map((el) => (
-        <div>{el.data().name}</div>
+      {acceptedNames.map((el) => (
+        <Name key={el} id={el} />
       ))}
     </div>
   );
