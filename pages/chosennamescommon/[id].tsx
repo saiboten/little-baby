@@ -10,6 +10,7 @@ import {
   PageProps,
   ChildType,
 } from "../../types/types";
+import { Name } from "../../components/Name";
 
 interface NameType {
   name: string;
@@ -28,27 +29,6 @@ async function getAllAcceptedNames(
 
   const subcollection = data as ChildUserSubCollectionType;
   return subcollection?.accepted;
-}
-
-interface NameProps {
-  id: string;
-}
-
-function Name({ id }: NameProps) {
-  const [data, loading, error] = useDocumentData(
-    doc(getFirestore(), `names/${id}`)
-  );
-  if (loading) {
-    return <span>Laster</span>;
-  }
-
-  if (error) {
-    return <span>Noe gikk galt</span>;
-  }
-
-  const name = data as NameType;
-
-  return <span>{name.name}</span>;
 }
 
 export default function ChosenNames({ userData }: PageProps) {

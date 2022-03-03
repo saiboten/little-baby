@@ -13,9 +13,10 @@ import firebase from "../../firebase/clientApp";
 import { useRouter } from "next/router";
 
 // Import the useAuthStateHook
-import { PageProps } from "../../types/types";
+import { ChildUserSubCollectionType, PageProps } from "../../types/types";
+import { Name } from "../../components/Name";
 
-export default function ChosenNames({ userData }: PageProps) {
+export default function ChosenNames({ user }: PageProps) {
   const router = useRouter();
   const { id } = router.query;
 
@@ -30,43 +31,10 @@ export default function ChosenNames({ userData }: PageProps) {
     childUserSubcollectionLoading,
     childUserSubcollectionError,
   ] = useDocumentData(
-    doc(getFirestore(firebase), `child/${id}/user/${userData.id}`)
+    doc(getFirestore(firebase), `child/${id}/user/${user.uid}`)
   );
-
-  const namesRef = collection(db, "names");
-
-  const [acceptedNames, namesLoading, namesError] = useCollection(
-    query(
-      namesRef,
-      where(
-        "id",
-        "in",
-        childUserSubcollectionData?.accepted &&
-          childUserSubcollectionData?.accepted.length > 0
-          ? childUserSubcollectionData?.accepted
-          : ["nope"]
-      )
-    )
-  );
-
-  const [rejectedNames, rejectedNamesLoading, rejectedNamesError] =
-    useCollection(
-      query(
-        namesRef,
-        where(
-          "id",
-          "in",
-          childUserSubcollectionData?.rejected &&
-            childUserSubcollectionData?.rejected.length > 0
-            ? childUserSubcollectionData?.rejected
-            : ["nope"]
-        )
-      )
-    );
 
   if (
-    namesLoading ||
-    rejectedNamesLoading ||
     childLoading ||
     childUserSubcollectionLoading ||
     childUserSubcollectionError
@@ -74,9 +42,12 @@ export default function ChosenNames({ userData }: PageProps) {
     return "Laster";
   }
 
-  if (namesError || rejectedNamesError || childError) {
+  if (childError) {
     return "Feil!";
   }
+
+  const childNameLists =
+    childUserSubcollectionData as ChildUserSubCollectionType;
 
   return (
     <div>
@@ -85,15 +56,20 @@ export default function ChosenNames({ userData }: PageProps) {
       </NextLink>
       <Heading>Flotte navn</Heading>
       <UnorderedList>
-        {acceptedNames?.docs.map((el) => (
-          <ListItem key={el.id}>{el.data().name}</ListItem>
+        {childNameLists.accepted?.map((el) => (
+          <ListItem key={el}>
+            <Name id={el} />
+          </ListItem>
         ))}
       </UnorderedList>
       <Heading>Fæle navn</Heading>
       <UnorderedList>
-        {rejectedNames?.docs.map((el) => (
-          <ListItem key={el.id}>{el.data().name}</ListItem>
-        ))}
+        Kommer snart
+        {/* {childNameLists.rejected?.map((el) => (
+          <ListItem key={el}>
+            <Name id={el} />
+          </ListItem>
+        ))} */}
       </UnorderedList>
     </div>
   );
