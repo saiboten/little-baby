@@ -27,7 +27,7 @@ import {
 } from "../../types/types";
 import { User } from "@firebase/auth";
 
-export default function Name({ userData }: PageProps) {
+export default function Name({ user }: PageProps) {
   const router = useRouter();
   const { id } = router.query;
 
@@ -40,7 +40,7 @@ export default function Name({ userData }: PageProps) {
   );
 
   const [userSubcollectionSnapshot] = useDocument(
-    doc(db, `child/${id}/user/${userData.id}`)
+    doc(db, `child/${id}/user/${user.uid}`)
   );
 
   const childData = childsnapshot?.data() as ChildType;

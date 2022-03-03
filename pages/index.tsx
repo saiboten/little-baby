@@ -62,7 +62,6 @@ export default function Home() {
     query(childRef, where("parents", "array-contains", user?.uid))
   );
 
-  // console.log the current user and loading status
   if (loading || childLoading) {
     return "Laster";
   }
