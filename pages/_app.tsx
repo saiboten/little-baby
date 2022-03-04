@@ -83,6 +83,7 @@ function MyApp({ Component, pageProps }: AppProps) {
   if (userLoading) {
     return (
       <>
+        This loading?
         {userError}
         {authState}
         <ProvidedLoader />
@@ -95,6 +96,7 @@ function MyApp({ Component, pageProps }: AppProps) {
   if (!userData && window.location.href.indexOf("auth") === 0) {
     return (
       <>
+        or this?
         {userError}
         {authState}
         <ProvidedLoader />
@@ -105,6 +107,7 @@ function MyApp({ Component, pageProps }: AppProps) {
     <ChakraProvider>
       {userError}
       {authState}
+      what...
       <InviteChecker user={userData} auth={auth} />
       <Container
         mt="10"
