@@ -13,34 +13,37 @@ import {
   where,
   setDoc,
 } from "firebase/firestore";
-import { ChildType, UserType } from "../types/types";
+import { ChildType, InviteType, UserType } from "../types/types";
 import { Auth } from "firebase/auth";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { Button } from "@chakra-ui/react";
 
 function Invite({
   inviteData,
+  inviteId,
   user,
   userEmail,
 }: {
-  inviteData: DocumentData;
+  inviteId: string;
+  inviteData: InviteType;
   user: UserType;
   userEmail: string;
 }) {
   const db = getFirestore();
-  const [childsnapshot] = useDocument(doc(db, `/child/${inviteData.id}`));
+
+  const [childsnapshot] = useDocument(doc(db, `/child/${inviteId}`));
   const [usersnapshot] = useDocument(doc(db, `/user/${user.id}`));
-  const [invitesnap] = useDocument(doc(db, `/invites/${inviteData.id}`));
+  const [invitesnap] = useDocument(doc(db, `/invites/${inviteId}`));
 
   const [userSubcollectionSnapshot] = useDocument(
-    doc(db, `child/${inviteData.id}/user/${user.id}`)
+    doc(db, `child/${inviteId}/user/${user.id}`)
   );
 
   function acceptInvite() {
     // Add child to user list
     if (usersnapshot?.ref) {
       updateDoc(usersnapshot.ref, {
-        children: [inviteData.id, ...user.children],
+        children: [inviteId, ...(user.children ?? [])],
       });
     }
     if (invitesnap?.ref) {
@@ -53,7 +56,7 @@ function Invite({
 
     if (childsnapshot?.ref) {
       updateDoc(childsnapshot.ref, {
-        parents: [inviteData.id, ...childsnapshot?.data()?.parents],
+        parents: [inviteId, ...(childsnapshot?.data()?.parents ?? [])],
       });
     }
 
@@ -80,14 +83,19 @@ export function InviteChecker({ user, auth }: { user: UserType; auth: Auth }) {
 
   return (
     <div>
-      {invites?.docs.map((invite) => (
-        <Invite
-          key={invite.id}
-          inviteData={invite.data()}
-          user={user}
-          userEmail={data?.email ?? ""}
-        />
-      ))}
+      {invites?.docs.map((invite) => {
+        const inviteData = invite.data() as InviteType;
+
+        return (
+          <Invite
+            key={invite.id}
+            inviteData={inviteData}
+            inviteId={invite.id}
+            user={user}
+            userEmail={data?.email ?? ""}
+          />
+        );
+      })}
     </div>
   );
 }

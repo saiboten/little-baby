@@ -20,5 +20,5 @@ export function Name({ id }: NameProps) {
 
   const name = data as NameType;
 
-  return <span>{name.name}</span>;
+  return <span>{name?.name ?? "-"}</span>;
 }
