@@ -64,12 +64,7 @@ export default function Home() {
   );
 
   if (loading || childLoading) {
-    return (
-      <>
-        Hallo?
-        <DefaultLoader />
-      </>
-    );
+    return <DefaultLoader />;
   }
 
   return (
