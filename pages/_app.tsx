@@ -81,7 +81,13 @@ function MyApp({ Component, pageProps }: AppProps) {
   }, []);
 
   if (userLoading) {
-    return <ProvidedLoader />;
+    return (
+      <>
+        {userError}
+        {authState}
+        <ProvidedLoader />
+      </>
+    );
   }
 
   const userData = usersnapshot?.data() as UserType;
