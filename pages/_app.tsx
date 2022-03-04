@@ -29,6 +29,7 @@ function MyApp({ Component, pageProps }: AppProps) {
   const db = getFirestore();
 
   const [redirect, setRedirect] = useState(false);
+  const [authState, setAuthState] = useState("");
 
   const router = useRouter();
 
@@ -61,6 +62,7 @@ function MyApp({ Component, pageProps }: AppProps) {
   );
 
   const authStateChanged = async (authState: any) => {
+    setAuthState(JSON.stringify(authState));
     if (authState === null) {
       setRedirect(true);
     } else {
@@ -85,11 +87,18 @@ function MyApp({ Component, pageProps }: AppProps) {
   const userData = usersnapshot?.data() as UserType;
 
   if (!userData && window.location.href.indexOf("auth") === 0) {
-    return <ProvidedLoader />;
+    return (
+      <>
+        {userError}
+        {authState}
+        <ProvidedLoader />
+      </>
+    );
   }
-
   return (
     <ChakraProvider>
+      {userError}
+      {authState}
       <InviteChecker user={userData} auth={auth} />
       <Container
         mt="10"
