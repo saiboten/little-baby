@@ -1,5 +1,12 @@
 import "../styles/globals.css";
-import { ChakraProvider, Link, Container, Box, Button } from "@chakra-ui/react";
+import {
+  ChakraProvider,
+  Link,
+  Container,
+  Box,
+  Button,
+  Divider,
+} from "@chakra-ui/react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { getAuth, signOut } from "@firebase/auth";
 import type { AppProps } from "next/app";
@@ -12,6 +19,7 @@ import { UserType } from "../types/types";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { InviteChecker } from "../components/InviteChecker";
+import { ProvidedLoader } from "../components/ProvidedLoader";
 
 const auth = getAuth(firebase);
 
@@ -71,25 +79,13 @@ function MyApp({ Component, pageProps }: AppProps) {
   }, []);
 
   if (userLoading) {
-    return (
-      <Container
-        mt="10"
-        border="1px solid"
-        borderColor="blue.500"
-        padding="5"
-        borderRadius="10px"
-      >
-        Laster
-      </Container>
-    );
+    return <ProvidedLoader />;
   }
 
   const userData = usersnapshot?.data() as UserType;
 
-  console.log(userData);
-
   if (!userData && window.location.href.indexOf("auth") === 0) {
-    return "Laster...";
+    return <ProvidedLoader />;
   }
 
   return (
@@ -102,10 +98,15 @@ function MyApp({ Component, pageProps }: AppProps) {
         padding="5"
         borderRadius="10px"
       >
-        <Button onClick={logout}>Logg ut</Button>
+        <Box>Logged inn som {user?.email ?? "Ukjent"}</Box>
+        <Button onClick={logout} mr="2">
+          Logg ut
+        </Button>
         <NextLink href="/">
           <Link>Tilbake til forsiden</Link>
         </NextLink>
+        <Box mb="5" />
+        <Divider />
         <Box mb="5" />
         <Component userData={userData} user={user} {...pageProps} />
       </Container>

@@ -31,6 +31,7 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useEffect } from "react";
 import { UserType } from "../types/types";
+import { DefaultLoader } from "../components/DefaultLoader";
 
 const auth = getAuth(firebase);
 
@@ -63,7 +64,7 @@ export default function Home() {
   );
 
   if (loading || childLoading) {
-    return "Laster";
+    return <DefaultLoader />;
   }
 
   return (
@@ -75,19 +76,23 @@ export default function Home() {
         </Button>
       </NextLink>
 
-      <Heading size="md">Dine barn</Heading>
+      {childsnapshot?.docs?.length ?? 0 > 0 ? (
+        <>
+          <Heading size="md">Dine barn</Heading>
 
-      <UnorderedList>
-        {childsnapshot?.docs.map((doc) => {
-          return (
-            <ListItem key={doc.id}>
-              <NextLink key={doc.id} href={`child/${doc.id}`}>
-                <Link>{doc.data().nickname}</Link>
-              </NextLink>
-            </ListItem>
-          );
-        })}
-      </UnorderedList>
+          <UnorderedList>
+            {childsnapshot?.docs.map((doc) => {
+              return (
+                <ListItem key={doc.id}>
+                  <NextLink key={doc.id} href={`child/${doc.id}`}>
+                    <Link>{doc.data().nickname}</Link>
+                  </NextLink>
+                </ListItem>
+              );
+            })}
+          </UnorderedList>
+        </>
+      ) : null}
     </>
   );
 }

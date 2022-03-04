@@ -54,15 +54,17 @@ export default function ChosenNames({ user }: PageProps) {
       <NextLink href={`/child/${childData?.id}`}>
         <Link>Tilbake til {childData?.nickname}</Link>
       </NextLink>
-      <Heading>Flotte navn</Heading>
-      <UnorderedList>
+      <Heading mt="5" size="md">
+        Flotte navn
+      </Heading>
+      <UnorderedList mb="5">
         {childNameLists.accepted?.map((el) => (
           <ListItem key={el}>
             <Name id={el} />
           </ListItem>
         ))}
       </UnorderedList>
-      <Heading>Fæle navn</Heading>
+      <Heading size="md">Fæle navn</Heading>
       <UnorderedList>
         Kommer snart
         {/* {childNameLists.rejected?.map((el) => (

@@ -4,8 +4,10 @@ import { getFirestore, doc, updateDoc } from "firebase/firestore";
 import { useRouter } from "next/router";
 import { useDocument, useDocumentData } from "react-firebase-hooks/firestore";
 import { InviteType } from "../../types/types";
-import { Input, Button } from "@chakra-ui/react";
+import { Input, Button, Link } from "@chakra-ui/react";
 import { DeleteIcon } from "@chakra-ui/icons";
+import NextLink from "next/link";
+import { DefaultLoader } from "../../components/DefaultLoader";
 
 function InvitePartner() {
   const db = getFirestore();
@@ -16,6 +18,10 @@ function InvitePartner() {
 
   const [inviteRef, inviteLoading, inviteError] = useDocument(
     doc(db, `/invites/${id}`)
+  );
+
+  const [childData, childLoading, childError] = useDocumentData(
+    doc(getFirestore(), `child/${id}`)
   );
 
   const invites = inviteRef?.data() as InviteType;
@@ -38,16 +44,19 @@ function InvitePartner() {
     }
   }
 
-  if (inviteLoading) {
-    return "Loading";
+  if (inviteLoading || childLoading) {
+    return <DefaultLoader />;
   }
 
-  if (inviteError) {
+  if (inviteError || childError) {
     return "Error";
   }
 
   return (
     <div>
+      <NextLink href={`/child/${childData?.id}`}>
+        <Link>Tilbake til {childData?.nickname}</Link>
+      </NextLink>
       <h1>Inviter partner</h1>
 
       <form onSubmit={addInvite}>

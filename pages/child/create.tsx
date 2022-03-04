@@ -120,7 +120,6 @@ export default function Child() {
             <Stack direction="row">
               <Radio value="boy">Gutt</Radio>
               <Radio value="girl">Jente</Radio>
-              <Radio value="other">Annet</Radio>
             </Stack>
           </RadioGroup>
         </FormControl>

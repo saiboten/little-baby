@@ -79,7 +79,7 @@ export default function ChosenNames({ userData }: PageProps) {
       <NextLink href={`/child/${childData?.id}`}>
         <Link>Tilbake til {childData?.nickname}</Link>
       </NextLink>
-      <Heading>Felles navn</Heading>
+      <Heading size="md">Felles navn</Heading>
       <UnorderedList>
         {acceptedNames.map((el) => (
           <ListItem key={el}>
