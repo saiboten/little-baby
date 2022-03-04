@@ -1,5 +1,11 @@
 // index.tsx
-import { Heading, Link, UnorderedList, ListItem } from "@chakra-ui/react";
+import {
+  Heading,
+  Link,
+  UnorderedList,
+  ListItem,
+  Button,
+} from "@chakra-ui/react";
 import {
   getFirestore,
   doc,
@@ -15,12 +21,13 @@ import { useRouter } from "next/router";
 // Import the useAuthStateHook
 import { ChildUserSubCollectionType, PageProps } from "../../types/types";
 import { Name } from "../../components/Name";
+import { useState } from "react";
 
 export default function ChosenNames({ user }: PageProps) {
   const router = useRouter();
   const { id } = router.query;
 
-  const db = getFirestore();
+  const [showBadNames, setShowBadNames] = useState(false);
 
   const [childData, childLoading, childError] = useDocumentData(
     doc(getFirestore(firebase), `child/${id}`)
@@ -65,14 +72,20 @@ export default function ChosenNames({ user }: PageProps) {
         ))}
       </UnorderedList>
       <Heading size="md">Fæle navn</Heading>
-      <UnorderedList>
-        Kommer snart
-        {/* {childNameLists.rejected?.map((el) => (
-          <ListItem key={el}>
-            <Name id={el} />
-          </ListItem>
-        ))} */}
-      </UnorderedList>
+
+      <Button onClick={() => setShowBadNames(!showBadNames)}>
+        Vis/Skjul fæle navn
+      </Button>
+
+      {showBadNames ? (
+        <UnorderedList>
+          {childNameLists.rejected?.map((el) => (
+            <ListItem key={el}>
+              <Name id={el} />
+            </ListItem>
+          ))}
+        </UnorderedList>
+      ) : null}
     </div>
   );
 }
