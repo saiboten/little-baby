@@ -3,13 +3,13 @@ import { ChakraProvider, Link, Container, Box, Button } from "@chakra-ui/react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { getAuth, signOut } from "@firebase/auth";
 import type { AppProps } from "next/app";
-import { doc, setDoc } from "firebase/firestore";
+import { addDoc, getDoc, doc, setDoc } from "firebase/firestore";
 import { useDocument } from "react-firebase-hooks/firestore";
 import { getFirestore } from "firebase/firestore";
 import NextLink from "next/link";
 import firebase from "../firebase/clientApp";
 import { UserType } from "../types/types";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { InviteChecker } from "../components/InviteChecker";
 
@@ -41,6 +41,13 @@ function MyApp({ Component, pageProps }: AppProps) {
       });
   }
 
+  async function createUser(userId: string) {
+    await setDoc(doc(db, `user/${userId}`), {
+      children: [],
+      id: userId,
+    });
+  }
+
   const [usersnapshot, userLoading, userError] = useDocument(
     doc(db, `user/${user?.uid}`)
   );
@@ -48,6 +55,13 @@ function MyApp({ Component, pageProps }: AppProps) {
   const authStateChanged = async (authState: any) => {
     if (authState === null) {
       setRedirect(true);
+    } else {
+      const userDoc = await getDoc(doc(db, `/user/${user?.uid}`));
+      if (!userDoc.exists()) {
+        if (user?.uid) {
+          createUser(user?.uid);
+        }
+      }
     }
   };
 
@@ -55,19 +69,6 @@ function MyApp({ Component, pageProps }: AppProps) {
     const authListener = auth.onAuthStateChanged(authStateChanged);
     return authListener;
   }, []);
-
-  const usersnapRef = usersnapshot?.ref;
-  const usersnapshotExists = usersnapshot?.exists();
-  const userId = user?.uid ?? "";
-
-  useEffect(() => {
-    if (!usersnapshotExists && usersnapRef) {
-      setDoc(usersnapRef, {
-        children: [],
-        id: userId,
-      });
-    }
-  }, [usersnapRef, usersnapshotExists, userId]);
 
   if (userLoading) {
     return (
@@ -84,6 +85,12 @@ function MyApp({ Component, pageProps }: AppProps) {
   }
 
   const userData = usersnapshot?.data() as UserType;
+
+  console.log(userData);
+
+  if (!userData && window.location.href.indexOf("auth") === 0) {
+    return "Laster...";
+  }
 
   return (
     <ChakraProvider>

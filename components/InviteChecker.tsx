@@ -19,31 +19,32 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { Button } from "@chakra-ui/react";
 
 function Invite({
-  inviteData,
   inviteId,
-  user,
+  userUid,
   userEmail,
 }: {
   inviteId: string;
-  inviteData: InviteType;
-  user: UserType;
+  userUid?: string;
   userEmail: string;
 }) {
   const db = getFirestore();
 
   const [childsnapshot] = useDocument(doc(db, `/child/${inviteId}`));
-  const [usersnapshot] = useDocument(doc(db, `/user/${user.id}`));
+  const [usersnapshot] = useDocument(doc(db, `/user/${userUid}`));
   const [invitesnap] = useDocument(doc(db, `/invites/${inviteId}`));
 
   const [userSubcollectionSnapshot] = useDocument(
-    doc(db, `child/${inviteId}/user/${user.id}`)
+    doc(db, `child/${inviteId}/user/${userUid}`)
   );
+
+  const userData = usersnapshot?.data() as UserType;
 
   function acceptInvite() {
     // Add child to user list
+
     if (usersnapshot?.ref) {
       updateDoc(usersnapshot.ref, {
-        children: [inviteId, ...(user.children ?? [])],
+        children: [inviteId, ...(userData.children ?? [])],
       });
     }
     if (invitesnap?.ref) {
@@ -56,16 +57,21 @@ function Invite({
 
     if (childsnapshot?.ref) {
       updateDoc(childsnapshot.ref, {
-        parents: [inviteId, ...(childsnapshot?.data()?.parents ?? [])],
+        parents: [userUid, ...(childsnapshot?.data()?.parents ?? [])],
       });
     }
 
     if (userSubcollectionSnapshot?.ref) {
-      setDoc(userSubcollectionSnapshot?.ref, { accepted: [], rejected: [] });
+      // setDoc(userSubcollectionSnapshot?.ref, { accepted: [], rejected: [] });
     }
   }
 
   const childData = childsnapshot?.data() as ChildType;
+
+  if (!userUid) {
+    return null;
+  }
+
   return (
     <div>
       Invite til {childData?.nickname}
@@ -89,9 +95,8 @@ export function InviteChecker({ user, auth }: { user: UserType; auth: Auth }) {
         return (
           <Invite
             key={invite.id}
-            inviteData={inviteData}
             inviteId={invite.id}
-            user={user}
+            userUid={data?.uid}
             userEmail={data?.email ?? ""}
           />
         );
