@@ -62,7 +62,7 @@ function Invite({
     }
 
     if (userSubcollectionSnapshot?.ref) {
-      // setDoc(userSubcollectionSnapshot?.ref, { accepted: [], rejected: [] });
+      setDoc(userSubcollectionSnapshot?.ref, { accepted: [], rejected: [] });
     }
   }
 
