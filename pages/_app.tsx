@@ -16,7 +16,7 @@ import { getFirestore } from "firebase/firestore";
 import NextLink from "next/link";
 import firebase from "../firebase/clientApp";
 import { UserType } from "../types/types";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/router";
 import { InviteChecker } from "../components/InviteChecker";
 import { ProvidedLoader } from "../components/ProvidedLoader";
@@ -25,8 +25,6 @@ const auth = getAuth(firebase);
 
 function MyApp({ Component, pageProps }: AppProps) {
   const [user] = useAuthState(auth);
-
-  const db = getFirestore();
 
   const [redirect, setRedirect] = useState(false);
   // const [authState, setAuthState] = useState("");
@@ -50,35 +48,38 @@ function MyApp({ Component, pageProps }: AppProps) {
       });
   }
 
-  async function createUser(userId: string) {
-    await setDoc(doc(db, `user/${userId}`), {
-      children: [],
-      id: userId,
-    });
-  }
-
   const [usersnapshot, userLoading, userError] = useDocument(
-    doc(db, `user/${user?.uid}`)
+    doc(getFirestore(), `user/${user?.uid}`)
   );
 
-  const authStateChanged = async (authState: any) => {
-    // setAuthState(JSON.stringify(authState));
-    if (authState === null) {
-      setRedirect(true);
-    } else {
-      const userDoc = await getDoc(doc(db, `/user/${user?.uid}`));
-      if (!userDoc.exists()) {
-        if (user?.uid) {
-          createUser(user?.uid);
+  const authStateChanged = useCallback(
+    () => async (authState: any) => {
+      async function createUser(userId: string) {
+        await setDoc(doc(getFirestore(), `user/${userId}`), {
+          children: [],
+          id: userId,
+        });
+      }
+
+      // setAuthState(JSON.stringify(authState));
+      if (authState === null) {
+        setRedirect(true);
+      } else {
+        const userDoc = await getDoc(doc(getFirestore(), `/user/${user?.uid}`));
+        if (!userDoc.exists()) {
+          if (user?.uid) {
+            createUser(user?.uid);
+          }
         }
       }
-    }
-  };
+    },
+    [user?.uid]
+  );
 
   useEffect(() => {
-    const authListener = auth.onAuthStateChanged(authStateChanged);
+    const authListener = auth.onAuthStateChanged(authStateChanged());
     return authListener;
-  }, []);
+  }, [authStateChanged]);
 
   if (userLoading) {
     return (
